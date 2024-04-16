@@ -20,8 +20,8 @@ export default function RootLayout({ children }) {
             <Link href="/hdcp">
               My Handicap
             </Link>
-            <Link href="/api/chat">
-            Chat
+            <Link href="/users">
+              Index
             </Link>
           </nav>
           {children}

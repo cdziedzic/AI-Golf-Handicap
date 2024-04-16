@@ -26,13 +26,13 @@ export async function POST(req) {
 
       let runResult = await forwardStream(runStream);
       while (runResult?.status === 'requires_action' && runResult.required_action?.type === 'submit_tool_outputs') {
+        
         const tool_outputs = await Promise.all(
           runResult.required_action.submit_tool_outputs.tool_calls.map(async (toolCall) => {
             if (toolCall.function.name === 'tavily_search') {
               try {
                 const parameters = JSON.parse(toolCall.function.arguments);
-              const query = parameters.query;
-                console.log('Querying Tavily:', query);
+                const query = parameters.query;
                 const response = await fetch('https://api.tavily.com/search', {
                   method: 'POST',
                   headers: {
@@ -51,7 +51,6 @@ export async function POST(req) {
                   }),
                 });
                 const data = await response.json();
-                console.log(data)
                 return {
                   tool_call_id: toolCall.id,
                   output: data.answer,
