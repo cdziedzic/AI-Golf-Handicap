@@ -70,10 +70,10 @@ export async function POST(req) {
                   }
                 })
                 const data = await response.json();
-                console.log(data)
+                console.log(data.rows)
                 return {
                   tool_call_id: toolCall.id,
-                  output: data,
+                  output: JSON.stringify(data.rows),
                 };
               } catch (error) {
                 console.error('Failed to fetch from db:', error);
