@@ -1,30 +1,17 @@
 import OpenAI from 'openai';
-import { AssistantResponse } from 'ai';
+import { AssistantResponse } from 'ai'
 
-// Create an OpenAI API client (that's edge friendly!)
+// Assuming you are using a server environment where you can import such modules
+
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY || '',
 });
 
-// IMPORTANT! Set the runtime to edge
 export const runtime = 'edge';
 
-const homeTemperatures = {
-  bedroom: 20,
-  'home office': 21,
-  'living room': 21,
-  kitchen: 22,
-  bathroom: 23,
-};
-
 export async function POST(req) {
-  // Parse the request body
   const input = await req.json();
-
-  // Create a thread if needed
   const threadId = input.threadId ?? (await openai.beta.threads.create({})).id;
-
-  // Add a message to the thread
   const createdMessage = await openai.beta.threads.messages.create(threadId, {
     role: 'user',
     content: input.message,
@@ -33,73 +20,73 @@ export async function POST(req) {
   return AssistantResponse(
     { threadId, messageId: createdMessage.id },
     async ({ forwardStream, sendDataMessage }) => {
-      // Run the assistant on the thread
       const runStream = openai.beta.threads.runs.createAndStream(threadId, {
-        assistant_id:
-          process.env.ASSISTANT_ID ??
-          (() => {
-            throw new Error('ASSISTANT_ID is not set');
-          })(),
+        assistant_id: process.env.ASSISTANT_ID || (() => { throw new Error('ASSISTANT_ID is not set'); })(),
       });
 
-      // forward run status would stream message deltas
       let runResult = await forwardStream(runStream);
+      while (runResult?.status === 'requires_action' && runResult.required_action?.type === 'submit_tool_outputs') {
 
-      // status can be: queued, in_progress, requires_action, cancelling, cancelled, failed, completed, or expired
-      while (
-        runResult?.status === 'requires_action' &&
-        runResult.required_action?.type === 'submit_tool_outputs'
-      ) {
-        const tool_outputs =
-          runResult.required_action.submit_tool_outputs.tool_calls.map(
-            (toolCall) => {
-              const parameters = JSON.parse(toolCall.function.arguments);
-
-              switch (toolCall.function.name) {
-                case 'getRoomTemperature': {
-                  const temperature =
-                    homeTemperatures[parameters.room];
-                  return {
-                    tool_call_id: toolCall.id,
-                    output: temperature.toString(),
-                  };
-                }
-
-                case 'setRoomTemperature': {
-                  const oldTemperature = homeTemperatures[parameters.room];
-                  homeTemperatures[parameters.room] = parameters.temperature;
-
-                  sendDataMessage({
-                    role: 'data',
-                    data: {
-                      oldTemperature,
-                      newTemperature: parameters.temperature,
-                      description: `Temperature in ${parameters.room} changed from ${oldTemperature} to ${parameters.temperature}`,
-                    },
-                  });
-
-                  return {
-                    tool_call_id: toolCall.id,
-                    output: `temperature set successfully`,
-                  };
-                }
-
-                default:
-                  throw new Error(
-                    `Unknown tool call function: ${toolCall.function.name}`,
-                  );
+        const tool_outputs = await Promise.all(
+          runResult.required_action.submit_tool_outputs.tool_calls.map(async (toolCall) => {
+            if (toolCall.function.name === 'tavily_search') {
+              try {
+                const parameters = JSON.parse(toolCall.function.arguments);
+                const query = parameters.query;
+                const response = await fetch('https://api.tavily.com/search', {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json',
+                  },
+                  body: JSON.stringify({
+                    api_key: process.env.TAVILY_API_KEY,
+                    query: query,
+                    search_depth: "basic",
+                    include_answer: true,
+                    include_images: false,
+                    include_raw_content: false,
+                    max_results: 5,
+                    include_domains: [],
+                    exclude_domains: []
+                  }),
+                });
+                const data = await response.json();
+                return {
+                  tool_call_id: toolCall.id,
+                  output: data.answer,
+                };
+              } catch (error) {
+                console.error('Failed to fetch from Tavily:', error);
+                throw new Error('Failed to fetch from Tavily');
               }
-            },
-          );
+            }
+            if (toolCall.function.name === 'db_query') {
+              console.log('fetching from db')
+              try {
+                const response = await fetch(process.env.API_ROUTE + '/api/users', {
+                  method: 'GET',
+                  headers: {
+                    'Content-Type': 'application/json',
+                  }
+                })
+                const data = await response.json();
+                console.log(data)
+                return {
+                  tool_call_id: toolCall.id,
+                  output: data,
+                };
+              } catch (error) {
+                console.error('Failed to fetch from db:', error);
+                throw new Error('Failed to fetch from db');
+              }
+            }
 
+          }),
+        );
         runResult = await forwardStream(
-          openai.beta.threads.runs.submitToolOutputsStream(
-            threadId,
-            runResult.id,
-            { tool_outputs },
-          ),
+          openai.beta.threads.runs.submitToolOutputsStream(threadId, runResult.id, { tool_outputs })
         );
       }
-    },
+    }
   );
 }
