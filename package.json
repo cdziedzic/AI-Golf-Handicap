@@ -16,7 +16,8 @@
     "next-auth": "^5.0.0-beta.16",
     "openai": "^4.33.0",
     "react": "^18",
-    "react-dom": "^18"
+    "react-dom": "^18",
+    "zod": "^3.22.4"
   },
   "devDependencies": {
     "@types/react": "18.2.76",

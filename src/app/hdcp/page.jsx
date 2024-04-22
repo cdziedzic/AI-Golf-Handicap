@@ -1,6 +1,7 @@
 'use client'
 import { useAssistant } from 'ai/react';
 
+
 const roleToColorMap = {
   system: 'red',
   user: 'black',
@@ -11,6 +12,7 @@ const roleToColorMap = {
 
 export default function Chat() {
   const { status, messages, input, submitMessage, handleInputChange } = useAssistant({ api: '/api/chat' });
+
 
   return (
     <div className="flex flex-col w-full max-w-md py-24 mx-auto stretch">

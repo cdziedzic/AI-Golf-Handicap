@@ -1,5 +1,6 @@
 import OpenAI from 'openai';
 import { AssistantResponse } from 'ai'
+import { sql } from '@vercel/postgres'
 
 // Assuming you are using a server environment where you can import such modules
 
@@ -70,7 +71,6 @@ export async function POST(req) {
                   }
                 })
                 const data = await response.json();
-                console.log(data.rows)
                 return {
                   tool_call_id: toolCall.id,
                   output: JSON.stringify(data.rows),
@@ -79,6 +79,17 @@ export async function POST(req) {
                 console.error('Failed to fetch from db:', error);
                 throw new Error('Failed to fetch from db');
               }
+            }
+            if (toolCall.function.name === 'db_insert') {
+              console.log('inserting into db') 
+              const parameters = JSON.parse(toolCall.function.arguments);
+              console.log(parameters)
+              const result = await sql`INSERT INTO rounds (user_id, course_name, course_rating, slope, score, holes_played, date_played, tees, differential) VALUES (${parameters.user_id}, ${parameters.course_name}, ${parameters.course_rating}, ${parameters.slope}, ${parameters.score}, ${parameters.holes_played}, ${parameters.date_played}, ${parameters.tees}, ${parameters.handicap_differential}) RETURNING *;`;
+             return {
+              result,
+               tool_call_id: toolCall.id,
+               output: 'success'
+             };
             }
 
           }),
