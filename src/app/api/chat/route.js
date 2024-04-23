@@ -79,15 +79,15 @@ export async function POST(req) {
               }
             }
             if (toolCall.function.name === 'db_insert') {
-              console.log('inserting into db') 
+              console.log('inserting into db')
               const parameters = JSON.parse(toolCall.function.arguments);
               console.log(parameters)
               const result = await sql`INSERT INTO rounds (user_id, course_name, course_rating, slope, score, holes_played, date_played, tees, differential) VALUES (${parameters.user_id}, ${parameters.course_name}, ${parameters.course_rating}, ${parameters.slope}, ${parameters.score}, ${parameters.holes_played}, ${parameters.date_played}, ${parameters.tees}, ${parameters.handicap_differential}) RETURNING *;`;
-             return {
-              result,
-               tool_call_id: toolCall.id,
-               output: 'success'
-             };
+              return {
+                result,
+                tool_call_id: toolCall.id,
+                output: 'success'
+              };
             }
 
           }),

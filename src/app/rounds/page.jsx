@@ -8,10 +8,7 @@ export default function Index() {
   const { data, error } = useSWR('/api/users', fetcher);
   const [users, setUsers] = useState([]);
 
-  console.log(data);
   const { rows } = data || {};
-  console.log(rows);
-
 
   return (
     <div>

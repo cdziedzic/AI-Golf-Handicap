@@ -15,7 +15,7 @@ export default function Index() {
 
   return (
     <div>
-      <h1>Users</h1>
+      <h1 className="text-3xl font-bold">Users</h1>
       {rows?.map((user) => (
         <div key={user.id}>
           <h2>{user.username}</h2>
