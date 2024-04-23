@@ -2,6 +2,8 @@
 import { sql } from '@vercel/postgres';
 import { NextResponse } from 'next/server';
 
+export const dynamic = 'force-dynamic';
+
 // Named export for the GET HTTP method
 export async function GET(request) {
     try {

@@ -7,6 +7,30 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY || '',
 });
 
+function Spinner() {
+  return <div>Loading...</div>;
+}
+
+function scorecard() {
+  return  (
+  <div class="max-w-sm mx-auto my-10 p-5 bg-gray-300 rounded-lg shadow-lg">
+  <div class="mb-2">
+    <h5 class="text-xl font-bold leading-none text-gray-900">John Doe</h5>
+    <p class="text-gray-600">Date: </p>
+  </div>
+  <div class="mb-2">
+    <p class="text-lg text-gray-800">Course: </p>
+    <p class="text-gray-600">Rating: 76.1</p>
+    <p class="text-gray-600">Slope: 135</p>
+    <p>Tees:</p>
+    <p>Differential:</p>
+  </div>
+  <div class="mb-2">
+    <p class="text-lg font-semibold text-gray-900">Score: </p>
+  </div>
+</div>
+  )}
+
 export const runtime = 'edge';
 
 export async function POST(req) {

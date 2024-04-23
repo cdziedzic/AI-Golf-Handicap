@@ -14,7 +14,7 @@ export default function Index() {
     <div>
       <h1>Rounds</h1>
       {rows?.map((round) => (
-        <div key={round.user_id}>
+        <div key={round.round_id}>
           <p>{round.date_played}</p>
           <p>{round.course_name}</p>
           <p>Score: {round.score}</p>
