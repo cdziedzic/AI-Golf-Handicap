@@ -13,18 +13,18 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body className={inter.className}>
-       <nav>
-            <Link href="/">
+        <nav className="bg-gray-800 text-white p-4">
+          <div className="hidden md:flex space-x-4">
+
+            <Link href="/hdcp">
               Home
             </Link>
-            <Link href="/hdcp">
-              My Handicap
+            <Link href="/rounds">
+              My Handicap info
             </Link>
-            <Link href="/users">
-              Index
-            </Link>
-          </nav>
-          {children}
+          </div>
+        </nav>
+        {children}
       </body>
     </html>
   );
