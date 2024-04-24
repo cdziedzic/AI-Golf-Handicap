@@ -9,8 +9,8 @@ export default function Index() {
   const [users, setUsers] = useState([]);
   const [handicap, setHandicap] = useState(null);
 
-  const rows = data?.rows || [];
   
+  const rows = data?.rows || [];
   useEffect(() => {
     if (data) {
       const diffs = rows.map(row => Number(row.differential))
@@ -18,11 +18,8 @@ export default function Index() {
       if (diffs.length >= 3) {
         // Ensure there are enough data points to sort and calculate
         const sortedDiffs = diffs.sort((a, b) => a - b);
-        console.log(sortedDiffs);
         const lowestEights = sortedDiffs.slice(0, 8);
-        console.log(lowestEights);
         const sumOfLowestEights = lowestEights.reduce((a, b) => a + b, 0);
-        console.log(sumOfLowestEights);
         const calculatedHandicap = sumOfLowestEights / sortedDiffs.length;
         
         setHandicap(calculatedHandicap.toFixed(1));  // Optional: format to 1 decimal place
