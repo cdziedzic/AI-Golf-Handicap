@@ -17,7 +17,7 @@ export default function Index() {
         const sortedDiffs = diffs.sort((a, b) => a - b);
         const lowestEights = sortedDiffs.slice(0, 8);
         const sumOfLowestEights = lowestEights.reduce((a, b) => a + b, 0);
-        const calculatedHandicap = sumOfLowestEights / sortedDiffs.length;
+        const calculatedHandicap = sumOfLowestEights / sumOfLowestEights.length;
         
         setHandicap(calculatedHandicap.toFixed(1));
       } else {

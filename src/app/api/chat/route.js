@@ -62,6 +62,7 @@ export async function POST(req) {
             if (toolCall.function.name === 'db_query') {
               console.log('fetching from db')
               try {
+                console.log("API Route:", process.env.API_ROUTE);
                 const response = await fetch(process.env.API_ROUTE + '/api/users', {
                   method: 'GET',
                   headers: {
