@@ -10,10 +10,10 @@ export default function Index() {
   const [handicap, setHandicap] = useState(null);
 
   
-  const rows = data?.rows || [];
+  const { rows } = data?.rows || [];
   useEffect(() => {
     if (data) {
-      const diffs = rows.map(row => Number(row.differential))
+      const diffs = data.rows.map(row => Number(row.differential))
       console.log(diffs);
       if (diffs.length >= 3) {
         // Ensure there are enough data points to sort and calculate
